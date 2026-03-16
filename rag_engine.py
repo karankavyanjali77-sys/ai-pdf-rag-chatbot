@@ -6,7 +6,6 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain_community.llms import HuggingFaceHub
 
-import os
 
 def build_vectorstore(pdf_paths):
 
@@ -41,13 +40,17 @@ def build_chatbot(vectorstore):
 
     llm = HuggingFaceHub(
         repo_id="google/flan-t5-base",
-        model_kwargs={"temperature":0.5,"max_length":512}
+        model_kwargs={
+            "temperature": 0.5,
+            "max_length": 512
+        }
     )
 
-   qa = ConversationalRetrievalChain.from_llm(
-    llm,
-    retriever=vectorstore.as_retriever(),
-    memory=memory,
-    return_source_documents=True
-   )
+    qa = ConversationalRetrievalChain.from_llm(
+        llm,
+        retriever=vectorstore.as_retriever(),
+        memory=memory,
+        return_source_documents=True
+    )
+
     return qa
