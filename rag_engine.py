@@ -44,10 +44,10 @@ def build_chatbot(vectorstore):
         model_kwargs={"temperature":0.5,"max_length":512}
     )
 
-    qa = ConversationalRetrievalChain.from_llm(
-        llm,
-        retriever=vectorstore.as_retriever(),
-        memory=memory
-    )
-
+   qa = ConversationalRetrievalChain.from_llm(
+    llm,
+    retriever=vectorstore.as_retriever(),
+    memory=memory,
+    return_source_documents=True
+   )
     return qa
