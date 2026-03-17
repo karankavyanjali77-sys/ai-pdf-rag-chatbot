@@ -92,9 +92,8 @@ if question and st.session_state.qa_chain:
 
         with st.spinner("Thinking..."):
 
-            result = st.session_state.qa_chain({"question": question})
-
-            answer = result["answer"]
+            result = st.session_state.qa_chain.invoke({"query": question})
+            answer = result["result"]
 
             st.write(answer)
 
