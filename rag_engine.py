@@ -1,11 +1,10 @@
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
-from langchain_ollama import OllamaLLM
-
+from langchain.memory import ConversationBufferMemory
+from langchain_community.llms import HuggingFaceHub
 
 def build_vectorstore(pdf_paths):
 
@@ -38,9 +37,13 @@ def build_chatbot(vectorstore):
         return_messages=True
     )
 
-    llm = OllamaLLM(
-        model="mistral",   # or "llama3"
-        temperature=0.5
+    llm = HuggingFaceHub(
+        repo_id="google/flan-t5-base",
+        task="text2text-generation",
+        model_kwargs={
+            "temperature": 0.5,
+            "max_new_tokens": 512
+        }
     )
 
     qa = ConversationalRetrievalChain.from_llm(
