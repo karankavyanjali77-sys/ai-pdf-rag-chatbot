@@ -1,56 +1,64 @@
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
-from langchain_community.llms import HuggingFaceHub
+from langchain_core.prompts import PromptTemplate
+from langchain.chains import RetrievalQA
 
-def build_vectorstore(pdf_paths):
+from langchain_groq import ChatGroq
 
-    docs = []
 
-    for pdf in pdf_paths:
-        loader = PyPDFLoader(pdf)
-        docs.extend(loader.load())
+def build_vectorstore(pdf_path):
+    # Load PDF
+    loader = PyPDFLoader(pdf_path)
+    docs = loader.load()
 
+    # Split text
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200
+        chunk_size=500,
+        chunk_overlap=100
     )
+    split_docs = splitter.split_documents(docs)
 
-    splits = splitter.split_documents(docs)
-
+    # Embeddings
     embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+        model_name="all-MiniLM-L6-v2"
     )
 
-    vectorstore = FAISS.from_documents(splits, embeddings)
+    # Vector DB
+    vectorstore = FAISS.from_documents(split_docs, embeddings)
 
     return vectorstore
 
 
 def build_chatbot(vectorstore):
-
-    memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        return_messages=True
+    # LLM (Groq)
+    llm = ChatGroq(
+        groq_api_key="YOUR_GROQ_API_KEY",
+        model_name="llama3-70b-8192"
     )
 
-    llm = HuggingFaceHub(
-        repo_id="google/flan-t5-base",
-        task="text2text-generation",
-        model_kwargs={
-            "temperature": 0.5,
-            "max_new_tokens": 512
-        }
+    # Prompt
+    prompt = PromptTemplate(
+        input_variables=["context", "question"],
+        template="""
+        You are an AI assistant. Answer ONLY from the context.
+
+        Context:
+        {context}
+
+        Question:
+        {question}
+
+        Answer:
+        """
     )
 
-    qa = ConversationalRetrievalChain.from_llm(
-        llm,
+    # QA Chain
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=llm,
         retriever=vectorstore.as_retriever(),
-        memory=memory,
-        return_source_documents=True
+        chain_type_kwargs={"prompt": prompt}
     )
 
-    return qa
+    return qa_chain
