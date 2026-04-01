@@ -7,3 +7,4 @@ langchain-groq
 faiss-cpu
 pypdf
 python-dotenv
+pydantic==1.10.13
