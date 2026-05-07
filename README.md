@@ -22,6 +22,8 @@ This project uses a Retrieval-Augmented Generation (RAG) pipeline with LangChain
 - Groq LLM
 - PyPDF
 
+
+````md
 ## Project Structure
 
 ```bash
@@ -30,6 +32,6 @@ This project uses a Retrieval-Augmented Generation (RAG) pipeline with LangChain
 ├── requirements.txt
 └── README.md
 
-**## Written About This Project**
+## Written About This Project
 
 I've also published a deeper architecture breakdown of this RAG system on CoderLegion: https://coderlegion.com/16946/building-rag-pipeline-that-answers-100-page-pdfs-in-under-seconds-architecture-decisions
